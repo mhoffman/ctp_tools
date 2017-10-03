@@ -3,8 +3,10 @@
 import os
 import sys
 import json
+from collections import defaultdict
 sys.path.append('/nfs/slac/g/suncatfs/data_catapp')
-from tools import extract_atoms, check_reaction 
+from tools import extract_atoms, check_reaction
+
 
 """
 Dear all
@@ -31,17 +33,21 @@ number = ''
 pages = ''
 year = '2017'  # year required
 publisher = ''
+doi = ''
 
-DFT_code = ''  # for example 'Quantum ESPRESSO'
-DFT_functional = ''  # For example 'BEEF-vdW'           
+DFT_codes = ['']  # for example 'Quantum ESPRESSO'
+DFT_functionals = ['']  # For example 'BEEF-vdW'
 
 #  ---------molecules info-----------
 
-# reactants[i] -> products_A[i] + products_B[i] 
+# reactants[i] -> products_A[i] + products_B[i]
 
-reactants = ['CCH3', 'CH3star']  # Update!
-products_A = ['C', 'CH3gas']
-products_B = ['CH3', 'star'] 
+reactions = [
+    # Examples
+    {'reactants': ['CCH3', 'CH3star'], 'products_A': ['C', 'CH3gas'], 'products_B': ['CH3', 'star']},
+    ##{'reactants': ['COstar'], 'products_A': ['CO-COgas'], 'products_B': ['star']},
+    #{'reactants': ['CH2star', 'CH3star'], 'products_A': ['CH4gas-H2gas', 'CH4gas-0.5H2gas'], 'products_B': ['star', 'star']},
+]
 
 """
 Include the phase if necessary:
@@ -68,12 +74,14 @@ products_B = ['star', 'star']
 surfaces = ['Pt']
 facets = ['111']
 
-#  ----------- You're done!------------------------  
+#  ----------- You're done!------------------------
 
 # Check reactions
-assert len(reactants) == len(products_A) == len(products_B)
-for AB, A, B in zip(reactants, products_A, products_B):
-    check_reaction(AB, A, B)
+for reaction_data in reactions:
+    assert len(reaction_data['reactants']) == len(
+        reaction_data['products_A']) == len(reaction_data['products_B'])
+    for AB, A, B in zip(reaction_data['reactants'], reaction_data['products_A'], reaction_data['products_B']):
+        check_reaction(AB, A, B)
 
 # Set up directories
 base = '/nfs/slac/g/suncatfs/data_catapp/%s/' % username
@@ -97,30 +105,45 @@ publication_dict = {'title': title,
                     'number': number,
                     'pages': pages,
                     'year': year,
-                    'publisher': publisher
+                    'publisher': publisher,
+                    'doi': doi,
                     }
 
 pub_txt = publication_base + 'publication.txt'
 json.dump(publication_dict, open(pub_txt, 'wb'))
 
-create = []  # list of directories to be made
-create.append(publication_base + DFT_code + '/')
-create.append(create[-1] + DFT_functional + '/')
 
-base_reactions = create[-1]
+def tree():
+    return defaultdict(tree)
 
-for i in range(len(reactants)):
-    reaction = '%s_%s_%s' % (reactants[i], products_A[i], products_B[i])
-    create.append(base_reactions + reaction + '/')
-    base_surfaces = create[-1]
-    for surface in surfaces:
-        create.append(base_surfaces + surface + '/')
-        base_facets = create[-1]        
-        for facet in facets:
-            create.append(base_facets + facet + '/')
+create = tree()  # list of directories to be made
+for DFT_code in DFT_codes:
+    create[DFT_code]
+    for DFT_functional in DFT_functionals:
+        create[DFT_code][DFT_functional]
+        for reaction_data in reactions:
+            for i in range(len(reaction_data['reactants'])):
+                reaction = '%s_%s_%s' % (reaction_data['reactants'][i], reaction_data[
+                                         'products_A'][i], reaction_data['products_B'][i])
+                create[DFT_code][DFT_functional][reaction]
+                for surface in surfaces:
+                    create[DFT_code][DFT_functional][reaction][surface]
+                    for facet in facets:
+                        create[DFT_code][DFT_functional][
+                            reaction][surface][facet]
 
-for path in create:
-    if not os.path.exists(path):
-        os.mkdir(path)
 
- 
+def rec(directory, current_path):
+    """
+    Create tree of directories from dictionary
+    Credit: https://stackoverflow.com/questions/22058010/python-create-file-directories-based-on-dictionary-key-names
+    """
+    if len(directory):
+        for direc in directory:
+            rec(directory[direc], os.path.join(current_path, direc))
+    else:
+        if not os.path.exists(current_path):
+            os.makedirs(current_path)
+            print(' - created {current_path}'.format(**locals()))
+
+rec(create, publication_base)
