@@ -25,18 +25,18 @@ username = os.environ['USER']
 
 # ---------publication info------------
 
-title = 'Fancy title'  # work title if not yet published
-authors = ['Doe, John', 'Einstein, Albert']  # name required
-journal = ''
-volume = ''
+title = 'Framework for Scalable Adsorbate-Adsorbate Interaction Models'  # work title if not yet published
+authors = ['Hoffmann, Max J.', 'Bligaard, Thomas.']  # name required
+journal = 'The Journal of Physical Chemistry C'
+volume = '120'
 number = ''
-pages = ''
-year = '2017'  # year required
-publisher = ''
-doi = ''
+pages = '13087'
+year = '2016'  # year required
+publisher = 'ACS'
+doi = '10.1021/acs.jpcc.6b03375'
 
-DFT_codes = ['']  # for example 'Quantum ESPRESSO'
-DFT_functionals = ['']  # For example 'BEEF-vdW'
+DFT_codes = ['Quantum ESPRESSO']  # for example 'Quantum ESPRESSO'
+DFT_functionals = ['BEEF-vdW']  # For example 'BEEF-vdW'
 
 #  ---------molecules info-----------
 
@@ -44,9 +44,15 @@ DFT_functionals = ['']  # For example 'BEEF-vdW'
 
 reactions = [
     # Examples
-    {'reactants': ['CCH3', 'CH3star'], 'products_A': ['C', 'CH3gas'], 'products_B': ['CH3', 'star']},
-    ##{'reactants': ['COstar'], 'products_A': ['CO-COgas'], 'products_B': ['star']},
-    #{'reactants': ['CH2star', 'CH3star'], 'products_A': ['CH4gas-H2gas', 'CH4gas-0.5H2gas'], 'products_B': ['star', 'star']},
+    {'reactants': ['Ostar', ], 'products_A':  ['Ogas'], 'products_B': ['star']},
+    {'reactants': ['Hstar', ], 'products_A':  ['Hgas'], 'products_B': ['star']},
+    {'reactants': ['Cstar', ], 'products_A':  ['Cgas'], 'products_B': ['star']},
+    {'reactants': ['Nstar', ], 'products_A':  ['Ngas'], 'products_B': ['star']},
+    {'reactants': ['COstar', ], 'products_A': ['COgas'], 'products_B': ['star']},
+    {'reactants': ['NOstar', ], 'products_A': ['NOgas'], 'products_B': ['star']},
+    {'reactants': ['CHstar', ], 'products_A': ['CHgas'], 'products_B': ['star']},
+    {'reactants': ['Sstar', ], 'products_A':  ['Sgas'], 'products_B': ['star']},
+    {'reactants': ['COstar', ], 'products_A': ['COgas'], 'products_B': ['star']},
 ]
 
 """
@@ -71,8 +77,8 @@ products_B = ['star', 'star']
 # ---------------surface info---------------------
 
 # If complicated structure: use term you would use in publication
-surfaces = ['Pt']
-facets = ['111']
+surfaces = ['Pt', 'Pd', 'Rh', 'Ir', 'Ag', 'Cu']
+facets = ['111-(1x1)', '111-(2x2)', '111-(4x4)']
 
 #  ----------- You're done!------------------------
 
@@ -123,7 +129,7 @@ for DFT_code in DFT_codes:
         create[DFT_code][DFT_functional]
         for reaction_data in reactions:
             for i in range(len(reaction_data['reactants'])):
-                reaction = '%s_%s_%s' % (reaction_data['reactants'][i], reaction_data[
+                reaction = '%s__%s_%s' % (reaction_data['reactants'][i], reaction_data[
                                          'products_A'][i], reaction_data['products_B'][i])
                 create[DFT_code][DFT_functional][reaction]
                 for surface in surfaces:
