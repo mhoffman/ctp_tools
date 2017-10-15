@@ -22,15 +22,17 @@ def store_node(db_filename, dirname, names):
                 publication, dft_code, dft_functional, reaction, substrate, facet = dsplit
             elif len(dsplit) == 4: # gas phase molecule
                 publication, dft_code, dft_functional, reaction = dsplit
-                substrate, facet = 'None', 'None'
+                substrate, facet = '', ''
                 # have to use string because ase.db does not accept None
             else:
                 continue
 
             if not facet == 'None':
                 facet = '({facet})'.format(**locals())
+            username = publication.split('_')[0]
 
             atoms = ase.io.read(os.path.join(dirname, name))
+            adsorbate = os.path.splitext(name)[0]
             db.write(atoms,
                     publication=publication,
                     dft_code=dft_code,
@@ -38,6 +40,8 @@ def store_node(db_filename, dirname, names):
                     reaction=reaction,
                     substrate=substrate,
                     facet=facet,
+                    username=username,
+                    adsorbate=adsorbate
                     )
 
 
