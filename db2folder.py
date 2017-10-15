@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 
 
 import ase
@@ -22,11 +23,30 @@ def mkdir_p(path):
             raise
 
 
+def publication_data_from_row(row):
+    return {
+            'volume': row.key_value_pairs['publication_volume'],
+            'publisher': row.key_value_pairs['publication_publisher'],
+            'doi': row.key_value_pairs['publication_doi'],
+            'title': row.key_value_pairs['publication_title'],
+            'url': row.key_value_pairs['publication_url'],
+            'journal': row.key_value_pairs['publication_journal'],
+            'authors': row.key_value_pairs['publication_authors'],
+            'year': row.key_value_pairs['publication_year'],
+            'number': row.key_value_pairs['publication_number'],
+            'pages': row.key_value_pairs['publication_pages'],
+            }
+
 def main(db_filename, folder_name):
     db = ase.db.connect(db_filename)
 
     mkdir_p(folder_name)
     for row in db.select():
+        if not os.path.exists(os.path.join(folder_name, 'publication.txt')):
+            with open(os.path.join(folder_name, 'publication.txt'), 'w') as outfile:
+                data = publication_data_from_row(row)
+                json.dump(data, outfile)
+
         atoms = row.toatoms()
         dft_code = row.key_value_pairs['dft_code']
         dft_functional = row.key_value_pairs['dft_functional']
