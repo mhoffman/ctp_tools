@@ -25,16 +25,16 @@ def mkdir_p(path):
 
 def publication_data_from_row(row):
     return {
-            'volume': row.key_value_pairs['publication_volume'],
-            'publisher': row.key_value_pairs['publication_publisher'],
-            'doi': row.key_value_pairs['publication_doi'],
-            'title': row.key_value_pairs['publication_title'],
-            'url': row.key_value_pairs['publication_url'],
-            'journal': row.key_value_pairs['publication_journal'],
-            'authors': row.key_value_pairs['publication_authors'],
-            'year': row.key_value_pairs['publication_year'],
-            'number': row.key_value_pairs['publication_number'],
-            'pages': row.key_value_pairs['publication_pages'],
+            'volume': row.key_value_pairs.get('publication_volume', ''),
+            'publisher': row.key_value_pairs.get('publication_publisher', ''),
+            'doi': row.key_value_pairs.get('publication_doi', ''),
+            'title': row.key_value_pairs.get('publication_title', ''),
+            'url': row.key_value_pairs.get('publication_url', ''),
+            'journal': row.key_value_pairs.get('publication_journal', ''),
+            'authors': row.key_value_pairs.get('publication_authors', ''),
+            'year': row.key_value_pairs.get('publication_year', ''),
+            'number': row.key_value_pairs.get('publication_number', ''),
+            'pages': row.key_value_pairs.get('publication_pages', ''),
             }
 
 def main(db_filename, folder_name):
@@ -48,12 +48,12 @@ def main(db_filename, folder_name):
                 json.dump(data, outfile)
 
         atoms = row.toatoms()
-        dft_code = row.key_value_pairs['dft_code']
-        dft_functional = row.key_value_pairs['dft_functional']
-        reaction = row.key_value_pairs['reaction']
-        substrate = row.key_value_pairs['substrate']
-        facet = row.key_value_pairs['facet'].strip('()')
-        adsorbate = row.key_value_pairs['adsorbate']
+        dft_code = row.key_value_pairs.get('dft_code', '')
+        dft_functional = row.key_value_pairs.get('dft_functional', '')
+        reaction = row.key_value_pairs.get('reaction', '')
+        substrate = row.key_value_pairs.get('substrate', '')
+        facet = row.key_value_pairs.get('facet', '').strip('()')
+        adsorbate = row.key_value_pairs.get('adsorbate', '')
 
         out_dirname = "{folder_name}/{dft_code}/{dft_functional}/{reaction}/{substrate}/{facet}".format(**locals())
         out_dirname = out_dirname.replace('/None', '')
